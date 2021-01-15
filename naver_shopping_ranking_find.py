@@ -57,6 +57,7 @@ import random
 for i in range(0, 10):
     url = "https://search.shopping.naver.com/best100v2/detail.nhn?catId=" + str(50000000+i)
     html = requests.get(url)
+
     soup = BeautifulSoup(html.text, 'lxml')
     metadata = soup.select('div.category_lst > div.summary_area > div > a.on')
     category = metadata[0].text
@@ -92,10 +93,28 @@ for i in range(0, 10):
             reviews_num = reviews_num.replace("(", "")
             reviews_num = reviews_num.replace(")", "")
 
+            # 판매처 애러 고쳐야 함
+            item_href = metadata_item[0].get('href')
+            print("item href")
+            print(item_href)
+            item_url = item_href
+            item_html = requests.get(item_url)
+            item_soup = BeautifulSoup(item_html.content, 'html.parser')
+            print("item soup")
+            print(item_soup)
+            metadata_url_item = item_soup.select('#snb > ul > li.floatingTab_on__299Bi > a > em')
+
+            print("matadata url item")
+            print(metadata_url_item)
+            supply_cnt = metadata_url_item[0].text
+            print("supply cnt")
+            print(supply_cnt)
+            # snb > ul > li.floatingTab_on__299Bi > a > em
+
+
             lst_item.append(item)
             lst_price.append(price)
             lst_reviews_num.append(reviews_num)
-
 
 
     # 50000011 : 면세품
