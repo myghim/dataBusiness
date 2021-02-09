@@ -1,8 +1,8 @@
-# 1. 목적 : 자바스크립트 등의 동적 변화가 있는 경우를 위해 Selenium을 활용하여 크롤링
-# 2. 목표 :
-# 3. 특징 :
-# 4. 대상 :
-# 5. 기대효과 :
+# 1. 목적 : 상품 리뷰를 통해 제품 구입한 고객의 니즈를 확인함
+# 2. 목표 : 네이버 쇼핑 카테고리에 있는 제품 리뷰 400개 크롤링
+# 3. 특징 : TEXT 파일로 저장되며 리뷰 한 개마다 띄어쓰기가 이루어짐
+# 4. 대상 : 네이버 쇼핑 리뷰
+# 5. 기대효과 : 네이버 쇼핑 리뷰 400여 개를 빠르게 스크리닝할 수 있음
 # --------------------------------------------------------------------------------------------------------
 
 # 환경 : Anaconda Python 3.7
@@ -10,12 +10,11 @@
 # 라이브러리
 # BeautifulSoup : html 파싱
 # requests : html 로드
-# pandas : 변수 데이터프레임화 및 CSV 쓰기
 # time : 크롤링 지연
 # random : 크롤링 지연 시 시간 난수 생성
+# textwrap : 한 줄 단위 텍스트 수 조절
 
 # --------------------------------------------------------------------------------------------------------
-# https://coalastudy.com:8181/api/static/user/kl8t0qvzx9t.html
 
 # 변수
 
@@ -23,14 +22,18 @@
 from selenium import webdriver
 import time
 from random import randint
-import pandas as pd
+import textwrap
 
 # webdriver 설정(chrome)
 browser = webdriver.Chrome("./chromedriver_win32/chromedriver.exe") # 일반 모드
 
+# 변경할 사항
 # URL
-url = "https://search.shopping.naver.com/catalog/22834543427"
-#url = "https://search.shopping.naver.com/catalog/20622820026"
+# 크롤링할 대상 네이버 쇼핑 카테고리 링크
+url = "https://search.shopping.naver.com/catalog/20622820026"
+
+# 유저 컴퓨터에 저장할 경로
+local = 'C:/Users/onycom/Desktop/네이버베스트/밀대2.txt'
 
 # 크롬 브라우저 내부 대기
 browser.implicitly_wait(3)
@@ -60,9 +63,6 @@ browser.get(url)
 # 크롤링 결과 저장 리스트
 review_text_lst = []
 
-# 파일 쓰기
-
-
 # 첫 번째 페이지 리뷰 크롤링
 try:
         for j in range(1, 21):
@@ -74,6 +74,7 @@ try:
 
 except :
         print("첫 번째 페이지 리뷰 크롤링 애러")
+
 
 # 두 번째 페이지부터 열 번째 페이지 리뷰
 try:
@@ -125,12 +126,19 @@ try:
 except:
         print("열 세번째부터 이십번째 페이지 리뷰 크롤링 애러")
 
-with open('C:/Users/onycom/Desktop/네이버베스트/배수구클리너.txt', 'w', encoding="utf-8") as f:
+with open('C:/Users/onycom/Desktop/네이버베스트/밀대.txt', 'w', encoding="utf-8") as f:
     for line in review_text_lst:
         f.write(line)
 
 
-# 데이터 다운로드
-print(pd.DataFrame(review_text_lst))
-
-#pd.DataFrame(review_text_lst).to_csv("C:/Users/onycom/Desktop/네이버베스트/review_text_lst.csv", encoding="euc-kr")
+with open(local, 'w', encoding="utf-8") as f:
+    for line in review_text_lst:
+        #print("line : ", line)
+        width_text = textwrap.wrap(line, width=50)
+        #print("width_text : ", width_text)
+        count = len(width_text)
+        for i in range(count):
+            #print("width_text[i] : ", width_text[i])
+            f.write(width_text[i])
+            f.write('\n')
+        f.write('\n')
