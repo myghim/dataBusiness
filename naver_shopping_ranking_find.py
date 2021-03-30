@@ -52,7 +52,7 @@ import numpy as np
 # 면세품 : https://search.shopping.naver.com/best100v2/detail.nhn?catId=50000010
 
 # ---------------------------------------------------------------------------------------------------------
-
+# 157 : 욕실용품, 욕실잡화 : 898, 욕실장/선반 : 8628, 샤워/목욕용품 : 8528, 욕실청소용품 : 8509
 # 대분류 카테고리 읽기
 for i in range(1, 11):
     url = "https://search.shopping.naver.com/best100v2/detail.nhn?catId=" + str(50000000+i)
@@ -140,9 +140,13 @@ for i in range(1, 11):
             lst_length.append(a)
 
         # 누적 매출액 계산(리뷰 작성률 2%, 10% 기준 각각 컬럼 생성)
-        vec_price = np.array(lst_price)
-        vec_reviews = np.array(lst_reviews_num).T
+        vec_price = np.array(lst_price, dtype=np.int32)
+        vec_reviews = np.array(lst_reviews_num, dtype=np.int32).T
 
+        print("-------------------------------------------------")
+        print("vec_price : ", vec_price)
+        print("-------------------------------------------------")
+        print("vec_reviews : ", vec_reviews)
         # 애러 발생 : 조건문을 작성하여서 리스트가 없는 경우와 리스트가 있는 경우로 나누어서 해결해야 함
         sales = vec_price * vec_reviews
         sales_2pct = sales * (100 / 2)
