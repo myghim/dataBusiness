@@ -35,7 +35,7 @@ import requests
 import pandas as pd
 import time
 import random
-
+import numpy as np
 # --------------------------------------------------------------------------------------------------------
 
 # 크롤링 html url
@@ -54,10 +54,9 @@ import random
 # ---------------------------------------------------------------------------------------------------------
 
 # 대분류 카테고리 읽기
-for i in range(0, 10):
+for i in range(1, 11):
     url = "https://search.shopping.naver.com/best100v2/detail.nhn?catId=" + str(50000000+i)
     html = requests.get(url)
-
     soup = BeautifulSoup(html.text, 'lxml')
     metadata = soup.select('div.category_lst > div.summary_area > div > a.on')
     category = metadata[0].text
@@ -66,12 +65,13 @@ for i in range(0, 10):
     lst_reviews_num = []
     # 50000001 ~ 50000010 : 패션의류, 패션잡화, 화장품/미용, 디지털/가전, 가구/인테리어, 출산/육아, 식품, 스포츠/레저, 생활/건강, 여가/생활편의
     # 50000001 ~ 50000010 html 상품 리스트화
-    if i < 10:
+    if i < 9:
         for j in range(1, 101):
             time.sleep(random.randint(1, 3))
             url = "https://search.shopping.naver.com/best100v2/detail.nhn?catId=" + str(50000000+i)
             html = requests.get(url)
             soup = BeautifulSoup(html.content, 'html.parser')
+
             metadata_item = soup.select('#productListArea > ul > li:nth-child({}) > p > a'.format(j))
             metadata_price = soup.select('#productListArea > ul > li:nth-child({}) > div.price > strong > span.num'.format(j))
             try:
@@ -82,18 +82,18 @@ for i in range(0, 10):
             item = metadata_item[0].text
             price = metadata_price[0].text
             price = price.replace(",","")
-
+            print(j, " : ", item)
             # ----------------다시하기 파싱이 안된 부분 reviews 문제를 해결해야 함
             try :
                 reviews_num = metadata_reviews_num[0].text
             except :
                 reviews_num = ""
 
-            reviews = reviews_num.replace(",", "")
+            reviews_num = reviews_num.replace(",", "")
             reviews_num = reviews_num.replace("(", "")
             reviews_num = reviews_num.replace(")", "")
 
-            # 판매처 애러 고쳐야 함
+            """# 판매처 애러 고쳐야 함
             item_href = metadata_item[0].get('href')
             print("item href")
             print(item_href)
@@ -109,13 +109,135 @@ for i in range(0, 10):
             supply_cnt = metadata_url_item[0].text
             print("supply cnt")
             print(supply_cnt)
-            # snb > ul > li.floatingTab_on__299Bi > a > em
+            # snb > ul > li.floatingTab_on__299Bi > a > em"""
 
+            try :
+                reviews_num = float(reviews_num)
+            except :
+                reviews_num = reviews_num
 
             lst_item.append(item)
             lst_price.append(price)
             lst_reviews_num.append(reviews_num)
 
+            price = price.replace("$", "")
+            price = price.replace(",", "")
+
+            price = float(price)
+
+            try:
+                reviews_num = float(reviews_num)
+            except:
+                reviews_num = reviews_num
+
+            lst_item.append(item)
+            lst_price.append(price)
+            lst_reviews_num.append(reviews_num)
+
+        # 상품 리스트 길이 계산 리스트
+        lst_length = []
+        for a in range(1, len(lst_item) + 1):
+            lst_length.append(a)
+
+        # 누적 매출액 계산(리뷰 작성률 2%, 10% 기준 각각 컬럼 생성)
+        vec_price = np.array(lst_price)
+        vec_reviews = np.array(lst_reviews_num).T
+
+        # 애러 발생 : 조건문을 작성하여서 리스트가 없는 경우와 리스트가 있는 경우로 나누어서 해결해야 함
+        sales = vec_price * vec_reviews
+        sales_2pct = sales * (100 / 2)
+        sales_10pct = sales * (100 / 10)
+
+        # 순위, 상품명, 상품가격 데이터프레임화
+        rank_data = pd.DataFrame({"순위": lst_length,
+                                  "아이템명": lst_item,
+                                  "가격": lst_price,
+                                  "리뷰수": lst_reviews_num,
+                                  "누적 매출액(리뷰 전환률 2%)": sales_2pct,
+                                  "누적 매출액(리뷰 전환률 10%)": sales_10pct})
+
+        # 기존 카테고리명에 포함된 '/' 제거
+        if "/" in category:
+            category = category.replace("/", "")
+        else:
+            pass
+
+        # 순위, 상품명 데이터 프레임 CSV 쓰기
+        local_time = time.strftime("%Y%m%d", time.localtime(time.time()))
+        rank_data.to_csv("C:/Users/onycom/Desktop/네이버베스트/네이버 베스트 100 {}_{}.csv".format(category, local_time),
+                         encoding="cp949", index=False)
+
+    elif i == 9:
+        for j in range(1, 101):
+            time.sleep(random.randint(1, 3))
+            url = "https://search.shopping.naver.com/best100v2/detail.nhn?catId=" + str(50000000+i)
+            html = requests.get(url)
+            soup = BeautifulSoup(html.content, 'html.parser')
+            metadata_item = soup.select('#productListArea > ul > li:nth-child({}) > p > a'.format(j))
+            metadata_price = soup.select('#productListArea > ul > li:nth-child({}) > div.price > strong > span.num'.format(j))
+            try:
+                metadata_reviews_num = soup.select('#productListArea > ul > li:nth-child({}) > div.info > span > a.txt > em'.format(j))
+            except :
+                pass
+            # productListArea > ul > li:nth-child(1) > div.info > span > a.txt > em
+            item = metadata_item[0].text
+            price = metadata_price[0].text
+            price = price.replace(",","")
+            print(j, " : ", item)
+            # ----------------다시하기 파싱이 안된 부분 reviews 문제를 해결해야 함
+            try :
+                reviews_num = metadata_reviews_num[0].text
+            except :
+                reviews_num = ""
+
+            reviews_num = reviews_num.replace(",", "")
+            reviews_num = reviews_num.replace("(", "")
+            reviews_num = reviews_num.replace(")", "")
+
+            price = float(price)
+            try :
+                reviews_num = float(reviews_num)
+            except :
+                reviews_num = reviews_num
+
+            lst_item.append(item)
+            lst_price.append(price)
+            lst_reviews_num.append(reviews_num)
+
+            price = price.replace("$", "")
+            price = price.replace(",", "")
+
+            price = float(price)
+            print(j, " : ", item)
+            try:
+                reviews_num = float(reviews_num)
+            except:
+                reviews_num = reviews_num
+
+            lst_item.append(item)
+            lst_price.append(price)
+            lst_reviews_num.append(reviews_num)
+
+        # 상품 리스트 길이 계산 리스트
+        lst_length = []
+        for a in range(1, len(lst_item) + 1):
+            lst_length.append(a)
+
+        # 순위, 상품명, 상품가격 데이터프레임화
+        rank_data = pd.DataFrame({"순위": lst_length,
+                                  "아이템명": lst_item,
+                                  "가격": lst_price})
+
+        # 기존 카테고리명에 포함된 '/' 제거
+        if "/" in category:
+            category = category.replace("/", "")
+        else:
+            pass
+
+        # 순위, 상품명 데이터 프레임 CSV 쓰기
+        local_time = time.strftime("%Y%m%d", time.localtime(time.time()))
+        rank_data.to_csv("C:/Users/onycom/Desktop/네이버베스트/네이버 베스트 100 {}_{}.csv".format(category, local_time),
+                         encoding="cp949", index=False)
 
     # 50000011 : 면세품
     # 50000011 html 상품 리스트화
@@ -140,18 +262,63 @@ for i in range(0, 10):
             reviews_num = reviews_num.replace("(", "")
             reviews_num = reviews_num.replace(")", "")
 
+            price = price.replace("$","")
+            price = price.replace(",","")
+
+            price = float(price)
+            print(j, " : ", item)
+            try :
+                reviews_num = float(reviews_num)
+            except :
+                reviews_num = reviews_num
+
             lst_item.append(item)
             lst_price.append(price)
             lst_reviews_num.append(reviews_num)
 
-    # 상품 리스트 길이 계산 리스트
+        # 상품 리스트 길이 계산 리스트
+        lst_length = []
+        for a in range(1, len(lst_item) + 1):
+            lst_length.append(a)
+
+        # 순위, 상품명, 상품가격 데이터프레임화
+        rank_data = pd.DataFrame({"순위": lst_length,
+                                  "아이템명": lst_item,
+                                  "가격": lst_price})
+
+        # 기존 카테고리명에 포함된 '/' 제거
+        if "/" in category:
+            category = category.replace("/", "")
+        else:
+            pass
+
+        # 순위, 상품명 데이터 프레임 CSV 쓰기
+        local_time = time.strftime("%Y%m%d", time.localtime(time.time()))
+        rank_data.to_csv("C:/Users/onycom/Desktop/네이버베스트/네이버 베스트 100 {}_{}.csv".format(category, local_time),
+                         encoding="cp949", index=False)
+
+"""    # 상품 리스트 길이 계산 리스트
     lst_length = []
     for a in range(1,len(lst_item)+1):
         lst_length.append(a)
 
+    # 누적 매출액 계산(리뷰 작성률 2%, 10% 기준 각각 컬럼 생성)
+    vec_price = np.array(lst_price)
+    vec_reviews = np.array(lst_reviews_num).T
+
+    # 애러 발생 : 조건문을 작성하여서 리스트가 없는 경우와 리스트가 있는 경우로 나누어서 해결해야 함
+    sales = vec_price * vec_reviews
+    sales_2pct = sales * (100/2)
+    sales_10pct = sales * (100 / 10)
+
     # 순위, 상품명, 상품가격 데이터프레임화
-    rank_data = pd.DataFrame({"순위": lst_length, "아이템명": lst_item, "가격" : lst_price, "리뷰수" : lst_reviews_num})
-    print(rank_data)
+    rank_data = pd.DataFrame({"순위": lst_length,
+                              "아이템명": lst_item,
+                              "가격" : lst_price,
+                              "리뷰수" : lst_reviews_num,
+                              "누적 매출액(리뷰 전환률 2%)" : sales_2pct,
+                              "누적 매출액(리뷰 전환률 10%)" : sales_10pct})
+
     # 기존 카테고리명에 포함된 '/' 제거
     if "/" in category:
         category = category.replace("/","")
@@ -159,4 +326,5 @@ for i in range(0, 10):
         pass
 
     # 순위, 상품명 데이터 프레임 CSV 쓰기
-    rank_data.to_csv("C:/Users/onycom/Desktop/네이버베스트/네이버 베스트 100 {}.csv".format(category), encoding="cp949")
+    local_time = time.strftime("%Y%m%d", time.localtime(time.time()))
+    rank_data.to_csv("C:/Users/onycom/Desktop/네이버베스트/네이버 베스트 100 {}_{}.csv".format(category,local_time), encoding="cp949", index=False)"""

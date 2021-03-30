@@ -33,7 +33,7 @@ browser = webdriver.Chrome("./chromedriver_win32/chromedriver.exe") # 일반 모
 url = "https://search.shopping.naver.com/catalog/20622820026"
 
 # 유저 컴퓨터에 저장할 경로
-local = 'C:/Users/onycom/Desktop/네이버베스트/밀대2.txt'
+local = 'C:/Users/onycom/Desktop/네이버베스트/물걸레.txt'
 
 # 크롬 브라우저 내부 대기
 browser.implicitly_wait(3)
@@ -70,7 +70,6 @@ try:
                 meta_review = browser.find_element_by_css_selector("#section_review > ul > li:nth-child({}) > div.reviewItems_review__1eF8A > div.reviewItems_review_text__2Bwpa > p".format(j))
                 review_text = meta_review.text
                 review_text_lst.append(review_text)
-
 
 except :
         print("첫 번째 페이지 리뷰 크롤링 애러")
@@ -124,12 +123,12 @@ try:
                 review_text = meta_review.text
                 review_text_lst.append(review_text)
 except:
+
         print("열 세번째부터 이십번째 페이지 리뷰 크롤링 애러")
 
-with open('C:/Users/onycom/Desktop/네이버베스트/밀대.txt', 'w', encoding="utf-8") as f:
+with open('C:/Users/onycom/Desktop/네이버베스트/배수구뚫어집게.txt', 'w', encoding="utf-8") as f:
     for line in review_text_lst:
         f.write(line)
-
 
 with open(local, 'w', encoding="utf-8") as f:
     for line in review_text_lst:
