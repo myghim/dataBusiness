@@ -25,7 +25,7 @@ from random import randint
 import textwrap
 
 # webdriver 설정(chrome)
-browser = webdriver.Chrome("./chromedriver_win32/chromedriver.exe") # 일반 모드
+browser = webdriver.Chrome("../chromedriver_win32/chromedriver.exe") # 일반 모드
 
 # 변경할 사항
 # URL

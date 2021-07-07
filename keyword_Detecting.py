@@ -16,9 +16,10 @@ keyword = input("입력하세요 :")
 url = "https://search.shopping.naver.com/search/all?query={}&cat_id=&frm=NVSHATC".format(keyword)
 html = requests.get(url)
 soup = BeautifulSoup(html.text, 'lxml')
+print(soup)
+
 for i in range(1,46):
-    print(i)
-    time.sleep(random.randint(1, 3))
-    metadata_item = soup.select('#__next > div > div.style_container__1YjHN > div.style_inner__18zZX > div.style_content_wrap__1PzEo > div.style_content__2T20F > ul > div > div:nth-child({}) > li > div > div.basicList_info_area__17Xyo > div.basicList_title__3P9Q7 > a'.format(i))
-    item = metadata_item[0].text
-    print(item)
+        time.sleep(random.randint(1, 3))
+        metadata_item = soup.select('#__next > div > div.style_container__1YjHN > div.style_inner__18zZX > div.style_content_wrap__1PzEo > div.style_content__2T20F > ul > div > div:nth-child({}) > li > div > div.basicList_info_area__17Xyo > div.basicList_title__3P9Q7 > a'.format(i))
+        item = metadata_item[0].text
+        print(i, ":", item)
