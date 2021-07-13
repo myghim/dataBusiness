@@ -51,6 +51,7 @@ import numpy as np
 # 여가/생활편의 : https://search.shopping.naver.com/best100v2/detail.nhn?catId=50000009
 # 면세품 : https://search.shopping.naver.com/best100v2/detail.nhn?catId=50000010
 
+
 # ---------------------------------------------------------------------------------------------------------
 # 157 : 욕실용품, 욕실잡화 : 898, 욕실장/선반 : 8628, 샤워/목욕용품 : 8528, 욕실청소용품 : 8509
 # 대분류 카테고리 읽기
