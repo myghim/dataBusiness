@@ -15,6 +15,7 @@ import random
 keyword = input("입력하세요 :")
 url = "https://search.shopping.naver.com/search/all?query={}&cat_id=&frm=NVSHATC".format(keyword)
 html = requests.get(url)
+print(html)
 soup = BeautifulSoup(html.text, 'lxml')
 for i in range(1,46):
     print(i)
